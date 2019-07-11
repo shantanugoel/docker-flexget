@@ -1,5 +1,4 @@
-FROM alpine:3.10
-MAINTAINER wiserain
+FROM lsiobase/alpine:3.10
 
 RUN \
 	echo "**** install frolvlad/alpine-python3 ****" && \
@@ -32,15 +31,17 @@ RUN \
 	pip install --upgrade --force-reinstall \
 		flexget && \
 	echo "**** system configurations ****" && \
-	apk --no-cache add shadow tzdata && \
-	sed -i 's/^CREATE_MAIL_SPOOL=yes/CREATE_MAIL_SPOOL=no/' /etc/default/useradd && \
+	apk --no-cache add \
+		bash \
+		bash-completion \
+		tzdata && \
 	echo "**** cleanup ****" && \
 	rm -rf \
 		/tmp/* \
 		/root/.cache
 
 # copy local files
-COPY files/ /
+COPY root/ /
 
 # add default volumes
 VOLUME /config /data
@@ -48,7 +49,3 @@ WORKDIR /config
 
 # expose port for flexget webui
 EXPOSE 3539 3539/tcp
-
-# run init.sh to set uid, gid, permissions and to launch flexget
-RUN chmod +x /scripts/init.sh
-CMD ["/scripts/init.sh"]
