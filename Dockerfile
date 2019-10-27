@@ -1,5 +1,5 @@
 FROM alpine:3.10
-MAINTAINER wiserain
+MAINTAINER shantanugoel
 
 RUN \
 	echo "**** install frolvlad/alpine-python3 ****" && \
