@@ -10,8 +10,8 @@ on:
     - cron: "0 21 * * 5"
 
 env:
-  DOCKERHUB_USER: wiserain
-  DOCKERHUB_REPO: flexget
+  DOCKERHUB_USER: shantanugoel
+  DOCKERHUB_REPO: docker-flexget
 
 jobs:
   docker-buildx:
