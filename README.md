@@ -4,18 +4,20 @@ Docker image for running [flexget](http://flexget.com/)
 
 Container features are
 
-- Lightweight alpine linux
+- [lsiobase/alpine](https://github.com/linuxserver/docker-baseimage-alpine)
 - Python 3
-- Flexget with initial settings (default ```config.yml``` and webui password)
-- pre-installed plug-ins (transmissionrpc, python-telegram-bot)
-
-~~Note that a default password for webui is set to ```f1exgetp@ss```.~~
-
-No default password anymore, secure webui using ```FG_WEBUI_PASSWD``` below.
+- pre-installed dependencies for plugins
+  - telegram
+  - cfscraper
+  - convert_magnet
+  - decompress
+  - transmission
+  - deluge
+  - irc
 
 ## Usage
 
-```
+```bash
 docker run -d \
     --name=<container name> \
     -p 3539:3539 \
@@ -28,3 +30,23 @@ docker run -d \
     -e TZ=<timezone> \
     wiserain/flexget
 ```
+
+Most importantly, secure webui using ```FG_WEBUI_PASSWD```.
+
+### Additional packages
+
+If there are additional packages you may want to install, create bash script with any name under ```/config/custom-cont-init.d```, for example,
+
+```bash
+#!/usr/bin/with-contenv bash
+apk add -q --no-cache <alpine pkgs>
+pip install <python pkgs>
+```
+
+Then, it will run every container start.
+
+### Custom plugins
+
+You can install custom plugins by ```FG_PLUGINS="{plugin_name_1} {plugin_name_2}"``` whose value is a space-separated list of plugin names. Current available ones are
+
+- ```write_magnet```: Mostly same as built-in ```convert_magnet``` but expect better performance and improved error handling, which is compatible with a version of libtorrent containerized in this image.

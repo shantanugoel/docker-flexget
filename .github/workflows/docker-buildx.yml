@@ -1,0 +1,47 @@
+name: docker-buildx
+
+on:
+  watch:
+    types: [started]
+  schedule:
+    - cron: "0 21 * * 5"
+
+env:
+  DOCKERHUB_USER: wiserain
+  DOCKERHUB_REPO: flexget
+
+jobs:
+  docker-buildx:
+    runs-on: ubuntu-latest
+    if: (github.event_name != 'watch') || (github.actor == github.event.repository.owner.login)
+    steps:
+      - 
+        name: Load Variables
+        id: vars
+        run: |
+          echo ::set-output name=flexget_ver::$(pip3 search flexget | grep FlexGet | awk '{print $2}' | tr -d '()')
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      - 
+        name: Run Buildx
+        uses: ilteoood/docker_buildx@master
+        with:
+          imageName: ${{ env.DOCKERHUB_USER }}/${{ env.DOCKERHUB_REPO }}
+          tag: latest,${{ steps.vars.outputs.flexget_ver }}
+          dockerFile: Dockerfile
+          buildArg: ALPINE_VER=3.12,LIBTORRENT_VER=1.2.7,FLEXGET_VER=${{ steps.vars.outputs.flexget_ver }}
+          publish: true
+          platform: linux/amd64,linux/arm/v7,linux/arm64
+          dockerHubUser: ${{ env.DOCKERHUB_USER }}
+          dockerHubPassword: ${{ secrets.DOCKERHUB_PASS }}
+      -
+        name: Send Notification
+        uses: sarisia/actions-status-discord@v1
+        if: always()
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          description: |
+            Image: ${{ env.DOCKERHUB_USER }}/${{ env.DOCKERHUB_REPO }}
+            Tags: latest, ${{ steps.vars.outputs.flexget_ver }}
