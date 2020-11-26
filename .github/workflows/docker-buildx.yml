@@ -12,6 +12,8 @@ on:
 env:
   DOCKERHUB_USER: shantanugoel
   DOCKERHUB_REPO: docker-flexget
+  ALPINE_VER: "3.12"
+  LIBTORRENT_VER: "2.0.0"
 
 jobs:
   docker-buildx:
@@ -23,6 +25,7 @@ jobs:
         id: vars
         run: |
           echo ::set-output name=flexget_ver::$(pip3 search flexget | grep FlexGet | awk '{print $2}' | tr -d '()')
+          echo ::set-output name=github_desc::$(curl -sX GET https://api.github.com/repos/wiserain/docker-flexget | jq -r .description)
       -
         name: Checkout
         uses: actions/checkout@v2
@@ -33,7 +36,7 @@ jobs:
           imageName: ${{ env.DOCKERHUB_USER }}/${{ env.DOCKERHUB_REPO }}
           tag: latest,${{ steps.vars.outputs.flexget_ver }}
           dockerFile: Dockerfile
-          buildArg: ALPINE_VER=3.12,LIBTORRENT_VER=1.2.7,FLEXGET_VER=${{ steps.vars.outputs.flexget_ver }}
+          buildArg: ALPINE_VER=${{ env.ALPINE_VER }},LIBTORRENT_VER=${{ env.LIBTORRENT_VER }},FLEXGET_VER=${{ steps.vars.outputs.flexget_ver }}
           publish: true
           platform: linux/arm64
           dockerHubUser: ${{ env.DOCKERHUB_USER }}
