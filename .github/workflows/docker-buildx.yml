@@ -1,9 +1,6 @@
 name: docker-buildx
 
 on:
-  push:
-    branches:
-    - master
   watch:
     types: [started]
   schedule:
