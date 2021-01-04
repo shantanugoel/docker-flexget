@@ -1,11 +1,11 @@
-ARG ALPINE_VER
-ARG LIBTORRENT_VER
+ARG ALPINE_VER=3.12
+ARG LIBTORRENT_VER=latest
 
 FROM wiserain/libtorrent:${LIBTORRENT_VER}-alpine${ALPINE_VER}-py3 AS libtorrent
-FROM lsiobase/alpine:${ALPINE_VER}
+FROM ghcr.io/linuxserver/baseimage-alpine:${ALPINE_VER}
 LABEL maintainer "wiserain"
 
-ARG FLEXGET_VER
+ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
 
 RUN \
     echo "**** install frolvlad/alpine-python3 ****" && \
@@ -18,26 +18,26 @@ RUN \
 	echo "**** install dependencies for plugin: telegram ****" && \
 	apk add --no-cache --virtual=build-deps gcc python3-dev libffi-dev musl-dev openssl-dev && \
 	pip install --upgrade python-telegram-bot==12.8 PySocks && \
-	apk del --purge --no-cache build-deps && \
 	echo "**** install dependencies for plugin: cfscraper ****" && \
 	apk add --no-cache --virtual=build-deps g++ gcc python3-dev libffi-dev openssl-dev && \
 	pip install --upgrade cloudscraper && \
-	apk del --purge --no-cache build-deps && \
 	echo "**** install dependencies for plugin: convert_magnet ****" && \
 	apk add --no-cache boost-python3 libstdc++ && \
 	echo "**** install dependencies for plugin: decompress ****" && \
 	apk add --no-cache unrar && \
 	pip install --upgrade \
 		rarfile && \
+	echo "**** install dependencies for plugin: transmission-rpc ****" && \
+	apk add --no-cache --virtual=build-deps build-base python3-dev && \
+	pip install --upgrade transmission-rpc && \
 	echo "**** install dependencies for plugin: misc ****" && \
 	pip install --upgrade \
-		transmissionrpc \
 		deluge-client \
 		irc_bot && \
 	echo "**** install flexget ****" && \
 	apk add --no-cache --virtual=build-deps gcc libxml2-dev libxslt-dev libc-dev python3-dev jpeg-dev && \
 	pip install --upgrade --force-reinstall \
-		flexget==${FLEXGET_VER} && \
+		flexget && \
 	apk del --purge --no-cache build-deps && \
 	apk add --no-cache libxml2 libxslt jpeg && \
 	echo "**** system configurations ****" && \
